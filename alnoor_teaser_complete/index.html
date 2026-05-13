@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>النور — روافد</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Scheherazade+New:wght@400;500;600;700&family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+  :root {
+    --gold: #c9a84c;
+    --gold-light: #f0d080;
+    --gold-pale: #e8c96a;
+    --white: #f8f4ec;
+    --off-white: #d4c9b0;
+    --black: #000000;
+    --deep: #050408;
+    --smoke: rgba(200,180,120,0.06);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; overflow-x: hidden; }
+
+  body {
+    background: #000;
+    color: var(--white);
+    font-family: 'Cairo', sans-serif;
+    direction: rtl;
+    overflow-x: hidden;
+    cursor: none;
+    animation: filmFlicker 8s infinite;
+  }
+
+  @keyframes filmFlicker {
+    0% { opacity: 1; }
+    92% { opacity: 1; }
+    93% { opacity: 0.985; }
+    94% { opacity: 1; }
+    96% { opacity: 0.992; }
+    100% { opacity: 1; }
+  }
+
+  /* Custom cursor */
+  .cursor {
+    position: fixed;
+    width: 8px; height: 8px;
+    background: var(--gold);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.1s;
+    mix-blend-mode: difference;
+  }
+  .cursor-ring {
+    position: fixed;
+    width: 36px; height: 36px;
+    border: 1px solid rgba(201,168,76,0.5);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transition: transform 0.15s, width 0.3s, height 0.3s, opacity 0.3s;
+  }
+
+  /* Canvas for particles */
+  #particle-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* ==================== PRELOADER ==================== */
+  #preloader {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 2rem;
+  }
+  .preloader-logo {
+    font-family: 'Scheherazade New', serif;
+    font-size: clamp(4rem, 12vw, 9rem);
+    font-weight: 700;
+    color: transparent;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    animation: pulse-glow 2s ease-in-out infinite;
+    letter-spacing: 0.05em;
+  }
+  .preloader-bar-wrap {
+    width: 200px;
+    height: 1px;
+    background: rgba(201,168,76,0.2);
+    position: relative;
+    overflow: hidden;
+  }
+  .preloader-bar {
+    position: absolute;
+    top: 0; right: 0;
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, transparent, var(--gold), var(--gold-light));
+    animation: load-bar 2s ease-out forwards;
+  }
+  @keyframes load-bar { to { width: 100%; } }
+  @keyframes pulse-glow {
+    0%,100% { filter: drop-shadow(0 0 20px rgba(201,168,76,0.4)); }
+    50% { filter: drop-shadow(0 0 50px rgba(201,168,76,0.9)); }
+  }
+
+  /* ==================== GLOBAL ==================== */
+  section {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    z-index: 1;
+  }
+
+  .section-inner {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 2rem;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  /* Cinematic vignette */
+  .vignette {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.85) 100%);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* Horizontal divider */
+  .gold-line {
+    width: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 2rem auto;
+    transition: width 1.5s ease;
+  }
+  .gold-line.visible { width: 300px; }
+
+  /* ==================== HERO ==================== */
+  #hero {
+    background: #000;
+    position: relative;
+  }
+
+  .hero-bg-rays {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+  .ray {
+    position: absolute;
+    bottom: -20%;
+    left: 50%;
+    transform-origin: bottom center;
+    width: 2px;
+    background: linear-gradient(to top, rgba(201,168,76,0.6), transparent);
+    opacity: 0;
+    animation: ray-appear 4s ease-out forwards;
+  }
+  @keyframes ray-appear {
+    0% { opacity: 0; height: 0; }
+    30% { opacity: 0.6; }
+    100% { opacity: 0.15; height: 120vh; }
+  }
+
+  /* Lens flare */
+  .lens-flare {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(1px);
+    animation: flare-drift 8s ease-in-out infinite;
+  }
+  @keyframes flare-drift {
+    0%,100% { transform: translate(0,0) scale(1); opacity: 0.6; }
+    50% { transform: translate(-30px, 20px) scale(1.2); opacity: 1; }
+  }
+
+  .hero-title {
+    font-family: 'Scheherazade New', serif;
+    font-size: clamp(6rem, 22vw, 18rem);
+    font-weight: 700;
+    line-height: 1;
+    color: transparent;
+    background: linear-gradient(180deg, var(--gold-light) 0%, var(--gold) 40%, #8a6520 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    filter: drop-shadow(0 0 24px rgba(201,168,76,0.22));
+    opacity: 0;
+    transform: scale(0.8);
+    letter-spacing: 0.05em;
+    position: relative;
+  }
+
+  .hero-sub {
+    font-family: 'Amiri', serif;
+    font-size: clamp(1.1rem, 3vw, 1.8rem);
+    color: var(--off-white);
+    letter-spacing: 0.15em;
+    opacity: 0;
+    transform: translateY(20px);
+    margin-top: 1.5rem;
+    font-style: italic;
+    text-shadow: 0 0 30px rgba(201,168,76,0.4);
+  }
+
+  .hero-event-tag {
+    position: absolute;
+    bottom: 6%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.4em;
+    color: rgba(201,168,76,0.5);
+    text-transform: uppercase;
+    opacity: 0;
+    animation: fade-up-in 1s ease forwards 4s;
+  }
+  @keyframes fade-up-in {
+    to { opacity: 1; transform: translateX(-50%) translateY(-8px); }
+  }
+
+  /* Scroll indicator */
+  .scroll-hint {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0;
+    animation: fade-up-in 1s ease forwards 5s;
+  }
+  .scroll-hint span {
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    color: rgba(201,168,76,0.4);
+  }
+  .scroll-line {
+    width: 1px;
+    height: 50px;
+    background: linear-gradient(to bottom, var(--gold), transparent);
+    animation: scroll-pulse 2s ease-in-out infinite 5s;
+  }
+  @keyframes scroll-pulse {
+    0%,100% { opacity: 0.3; transform: scaleY(0.5); transform-origin: top; }
+    50% { opacity: 1; transform: scaleY(1); }
+  }
+
+  /* ==================== SECTION 1 — MYSTERY ==================== */
+  #mystery {
+    background: linear-gradient(to bottom, #000 0%, #050305 50%, #000 100%);
+  }
+
+  .mystery-line {
+    font-family: 'Scheherazade New', serif;
+    font-size: clamp(1.5rem, 5vw, 3.5rem);
+    font-weight: 600;
+    opacity: 0;
+    transform: translateY(40px);
+    line-height: 2;
+    color: var(--white);
+  }
+  .mystery-line.gold-text {
+    color: var(--gold-light);
+    filter: drop-shadow(0 0 20px rgba(201,168,76,0.5));
+  }
+  .mystery-line.huge {
+    font-size: clamp(2.5rem, 8vw, 6rem);
+    color: var(--gold-pale);
+    filter: drop-shadow(0 0 40px rgba(201,168,76,0.6));
+    letter-spacing: 0.1em;
+  }
+
+  /* ==================== SECTION 2 — REVEAL ==================== */
+  #reveal {
+    background: #000;
+    position: relative;
+  }
+
+  .reveal-bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 50%, rgba(201,168,76,0.05) 0%, transparent 70%);
+  }
+
+  .reveal-sequence {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+    align-items: center;
+  }
+
+  .reveal-line {
+    font-family: 'Scheherazade New', serif;
+    font-weight: 700;
+    opacity: 0;
+    clip-path: inset(0 100% 0 0);
+    position: relative;
+  }
+  .reveal-line:nth-child(1) { font-size: clamp(1.2rem, 4vw, 2.5rem); color: var(--off-white); }
+  .reveal-line:nth-child(2) { font-size: clamp(1.5rem, 5vw, 3.2rem); color: var(--white); }
+  .reveal-line:nth-child(3) { font-size: clamp(1.5rem, 5vw, 3.2rem); color: var(--white); }
+  .reveal-line:nth-child(4) {
+    font-size: clamp(2.5rem, 9vw, 6.5rem);
+    color: transparent;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    filter: drop-shadow(0 0 40px rgba(201,168,76,0.7));
+  }
+
+  .separator-line {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    opacity: 0;
+    width: 100%;
+    max-width: 500px;
+  }
+  .sep-hr { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+  .sep-diamond {
+    width: 6px; height: 6px;
+    background: var(--gold);
+    transform: rotate(45deg);
+    flex-shrink: 0;
+  }
+
+  /* ==================== SECTION 3 — EVENT ==================== */
+  #event {
+    background: linear-gradient(to bottom, #000, #030205, #000);
+    position: relative;
+  }
+
+  .event-label {
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.5em;
+    color: var(--gold);
+    opacity: 0;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+
+  .event-title {
+    font-family: 'Scheherazade New', serif;
+    font-size: clamp(4rem, 15vw, 11rem);
+    font-weight: 700;
+    color: transparent;
+    background: linear-gradient(135deg, #fff 0%, var(--gold-light) 50%, var(--off-white) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    opacity: 0;
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 80px rgba(201,168,76,0.4));
+    letter-spacing: 0.1em;
+  }
+
+  .event-sub {
+    font-family: 'Cairo', sans-serif;
+    font-size: clamp(0.9rem, 2.5vw, 1.3rem);
+    color: var(--off-white);
+    opacity: 0;
+    letter-spacing: 0.3em;
+    margin-top: 1.5rem;
+  }
+
+  .cinematic-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin: 2.5rem 0;
+    opacity: 0;
+  }
+  .cdiv-line { height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+  .cdiv-line.long { width: 150px; }
+  .cdiv-line.short { width: 40px; }
+  .cdiv-circle {
+    width: 10px; height: 10px;
+    border: 1px solid var(--gold);
+    border-radius: 50%;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .cdiv-circle::after {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    background: var(--gold);
+    border-radius: 50%;
+  }
+
+  /* ==================== SECTION 4 — FINALE ==================== */
+  #finale {
+    background: #000;
+    position: relative;
+    flex-direction: column;
+  }
+
+  .finale-bg-glow {
+    position: absolute;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(201,168,76,0.12) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    animation: glow-breathe 4s ease-in-out infinite;
+  }
+  @keyframes glow-breathe {
+    0%,100% { transform: translate(-50%,-50%) scale(1); opacity: 0.8; }
+    50% { transform: translate(-50%,-50%) scale(1.3); opacity: 1; }
+  }
+
+  .finale-question {
+    font-family: 'Scheherazade New', serif;
+    font-size: clamp(2.5rem, 10vw, 7rem);
+    font-weight: 700;
+    color: transparent;
+    background: linear-gradient(180deg, #fff 0%, var(--gold-light) 60%, var(--gold) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    opacity: 0;
+    text-align: center;
+    line-height: 1.3;
+    filter: drop-shadow(0 0 18px rgba(201,168,76,0.18));
+    position: relative;
+    z-index: 2;
+  }
+
+  .cta-button {
+    display: inline-block;
+    margin-top: 3rem;
+    padding: 1rem 3.5rem;
+    font-family: 'Cairo', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    color: #000;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold) 100%);
+    border: none;
+    cursor: none;
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    z-index: 2;
+    transition: transform 0.3s, box-shadow 0.3s;
+    background-size: 200% 100%;
+    animation: shimmer-bg 3s linear infinite;
+  }
+  @keyframes shimmer-bg {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+  .cta-button::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
+    transform: translateX(-100%);
+    transition: transform 0.5s;
+  }
+  .cta-button:hover::before { transform: translateX(100%); }
+  .cta-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 50px rgba(201,168,76,0.6), 0 0 100px rgba(201,168,76,0.2);
+  }
+
+  /* Small ornamental corners */
+  .corner-ornament {
+    position: absolute;
+    width: 60px; height: 60px;
+    opacity: 0.3;
+    z-index: 2;
+  }
+  .corner-ornament svg { width: 100%; height: 100%; }
+  .corner-ornament.tl { top: 2rem; right: 2rem; }
+  .corner-ornament.tr { top: 2rem; left: 2rem; transform: scaleX(-1); }
+  .corner-ornament.bl { bottom: 2rem; right: 2rem; transform: scaleY(-1); }
+  .corner-ornament.br { bottom: 2rem; left: 2rem; transform: scale(-1); }
+
+  /* Smoke overlay */
+  .smoke-overlay {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 80%, rgba(201,168,76,0.04) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba(200,180,150,0.03) 0%, transparent 50%);
+    animation: smoke-shift 12s ease-in-out infinite alternate;
+    pointer-events: none;
+    z-index: 1;
+  }
+  @keyframes smoke-shift {
+    0% { transform: translateX(0) translateY(0); }
+    100% { transform: translateX(20px) translateY(-15px); }
+  }
+
+  /* Footer bar */
+  .footer-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, var(--gold) 30%, var(--gold-light) 50%, var(--gold) 70%, transparent 100%);
+    z-index: 100;
+    opacity: 0.5;
+  }
+
+  /* Audio button */
+  .audio-btn {
+    position: fixed;
+    bottom: 2rem;
+    left: 2rem;
+    z-index: 500;
+    background: rgba(0,0,0,0.7);
+    border: 1px solid rgba(201,168,76,0.3);
+    color: var(--gold);
+    padding: 0.6rem 1.2rem;
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    cursor: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    backdrop-filter: blur(10px);
+    opacity: 0;
+    animation: fade-in-audio 1s ease forwards 6s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  @keyframes fade-in-audio { to { opacity: 1; } }
+  .audio-btn:hover {
+    border-color: var(--gold);
+    box-shadow: 0 0 20px rgba(201,168,76,0.2);
+  }
+  .audio-icon { font-size: 1rem; }
+
+  /* Camera shake keyframes */
+  @keyframes camera-shake {
+    0%, 100% { transform: translate(0,0) rotate(0deg); }
+    10% { transform: translate(-3px, -2px) rotate(-0.3deg); }
+    20% { transform: translate(3px, 2px) rotate(0.2deg); }
+    30% { transform: translate(-2px, 3px) rotate(0.1deg); }
+    40% { transform: translate(2px, -2px) rotate(-0.2deg); }
+    50% { transform: translate(-3px, 1px) rotate(0.3deg); }
+    60% { transform: translate(3px, -3px) rotate(-0.1deg); }
+    70% { transform: translate(-1px, 2px) rotate(0.2deg); }
+    80% { transform: translate(2px, -1px) rotate(-0.3deg); }
+    90% { transform: translate(-2px, 3px) rotate(0.1deg); }
+  }
+  .shake { animation: camera-shake 0.5s ease; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .corner-ornament { width: 40px; height: 40px; }
+    .cdiv-line.long { width: 80px; }
+    .cta-button { padding: 0.8rem 2rem; font-size: 0.85rem; }
+    .audio-btn { bottom: 1rem; left: 1rem; }
+  }
+
+  /* Noise grain overlay */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9990;
+    opacity: 0.4;
+  }
+
+  /* Cinematic black bars */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 80px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent);
+    z-index: 9980;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<!-- Custom Cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+
+<!-- Particle Canvas -->
+<canvas id="particle-canvas"></canvas>
+
+<!-- Footer bar -->
+<div class="footer-bar"></div>
+
+<!-- Audio Button -->
+<button class="audio-btn" id="audio-btn" onclick="toggleAudio()">
+  <span class="audio-icon">◉</span>
+  <span id="audio-label">الصوت</span>
+</button>
+
+<!-- AUDIO LAYERS -->
+<audio id="ambient-audio" autoplay muted loop playsinline preload="auto" src="sounds/ambient.wav"></audio>
+<audio id="boom-sfx" preload="auto" src="sounds/boom.wav"></audio>
+<audio id="hit-sfx" preload="auto" src="sounds/hit.wav"></audio>
+<audio id="rise-sfx" preload="auto" src="sounds/rise.wav"></audio>
+<audio id="click-sfx" preload="auto" src="sounds/click.wav"></audio>
+
+<!-- ==================== PRELOADER ==================== -->
+<div id="preloader">
+  <div class="preloader-logo">النور</div>
+  <div class="preloader-bar-wrap">
+    <div class="preloader-bar"></div>
+  </div>
+</div>
+
+<!-- Corner ornaments SVG helper -->
+<svg style="display:none">
+  <symbol id="corner-svg" viewBox="0 0 60 60" fill="none">
+    <path d="M60 0 L0 0 L0 60" stroke="#c9a84c" stroke-width="1" fill="none"/>
+    <path d="M45 0 L0 0 L0 45" stroke="#c9a84c" stroke-width="0.5" opacity="0.5" fill="none"/>
+    <circle cx="3" cy="3" r="2" fill="#c9a84c" opacity="0.8"/>
+  </symbol>
+</svg>
+
+<!-- ==================== HERO ==================== -->
+<section id="hero">
+  <div class="hero-bg-rays" id="hero-rays"></div>
+
+  <!-- Lens flares -->
+  <div class="lens-flare" style="width:200px;height:200px;background:radial-gradient(circle,rgba(201,168,76,0.15) 0%,transparent 70%);top:30%;right:20%;animation-delay:0s;"></div>
+  <div class="lens-flare" style="width:80px;height:80px;background:radial-gradient(circle,rgba(255,240,180,0.2) 0%,transparent 70%);top:25%;left:30%;animation-delay:3s;"></div>
+  <div class="lens-flare" style="width:40px;height:40px;background:radial-gradient(circle,rgba(255,255,255,0.3) 0%,transparent 70%);top:40%;right:35%;animation-delay:6s;"></div>
+
+  <div class="vignette"></div>
+  <div class="smoke-overlay"></div>
+
+  <!-- Corner ornaments -->
+  <div class="corner-ornament tl"><svg><use href="#corner-svg"/></svg></div>
+  <div class="corner-ornament tr"><svg><use href="#corner-svg"/></svg></div>
+  <div class="corner-ornament bl"><svg><use href="#corner-svg"/></svg></div>
+  <div class="corner-ornament br"><svg><use href="#corner-svg"/></svg></div>
+
+  <div class="section-inner">
+    <h1 class="hero-title" id="hero-title">النور</h1>
+    <p class="hero-sub" id="hero-sub">حين يشتد الظلام… يظهر النور</p>
+  </div>
+
+  <div class="hero-event-tag">فرقة النور — روافد</div>
+
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    <span>اكتشف</span>
+  </div>
+</section>
+
+<!-- ==================== SECTION 1 — MYSTERY ==================== -->
+<section id="mystery">
+  <div class="vignette"></div>
+  <div class="smoke-overlay"></div>
+
+  <div class="section-inner">
+    <p class="mystery-line" data-reveal style="text-align:right;max-width:500px;margin-right:auto;">قصة…</p>
+    <div class="gold-line" data-line></div>
+    <p class="mystery-line gold-text" data-reveal style="font-size:clamp(1.8rem,6vw,4rem);text-align:left;max-width:600px;margin-left:auto;">لم تُروَ بعد</p>
+    <div style="height:3rem"></div>
+    <p class="mystery-line" data-reveal style="font-size:clamp(1.2rem,3.5vw,2.2rem);color:var(--off-white)">مشهد سيغيّر كل شيء</p>
+    <div style="height:4rem"></div>
+    <p class="mystery-line huge" data-reveal>استعدوا</p>
+  </div>
+</section>
+
+<!-- ==================== SECTION 2 — REVEAL ==================== -->
+<section id="reveal">
+  <div class="reveal-bg"></div>
+  <div class="vignette"></div>
+
+  <div class="section-inner">
+    <div class="reveal-sequence" id="reveal-seq">
+      <div class="separator-line" id="sep-top">
+        <div class="sep-hr"></div><div class="sep-diamond"></div><div class="sep-hr"></div>
+      </div>
+      <p class="reveal-line">في روافد...</p>
+      <p class="reveal-line">حين تجتمع الأصوات</p>
+      <p class="reveal-line">وتبدأ الحكاية</p>
+      <p class="reveal-line">يولد النور</p>
+      <div class="separator-line" id="sep-bottom">
+        <div class="sep-hr"></div><div class="sep-diamond"></div><div class="sep-hr"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SECTION 3 — EVENT ==================== -->
+<section id="event">
+  <div class="vignette"></div>
+  <div class="smoke-overlay"></div>
+
+  <div class="corner-ornament tl"><svg><use href="#corner-svg"/></svg></div>
+  <div class="corner-ornament br"><svg><use href="#corner-svg"/></svg></div>
+
+  <div class="section-inner">
+    <p class="event-label" id="ev-label">حيث يلتقي الشباب على المسرح</p>
+
+    <div class="cinematic-divider" id="cdiv1">
+      <div class="cdiv-line long"></div>
+      <div class="cdiv-circle"></div>
+      <div class="cdiv-line short"></div>
+      <div class="cdiv-circle"></div>
+      <div class="cdiv-line long"></div>
+    </div>
+
+    <h2 class="event-title" id="ev-title">روافد</h2>
+
+    <div class="cinematic-divider" id="cdiv2">
+      <div class="cdiv-line long"></div>
+      <div class="cdiv-circle"></div>
+      <div class="cdiv-line short"></div>
+      <div class="cdiv-circle"></div>
+      <div class="cdiv-line long"></div>
+    </div>
+
+    <p class="event-sub" id="ev-sub">قريبًا على المسرح</p>
+  </div>
+</section>
+
+<!-- ==================== SECTION 4 — FINALE ==================== -->
+<section id="finale">
+  <div class="finale-bg-glow"></div>
+  <div class="vignette"></div>
+  <div class="smoke-overlay"></div>
+
+  <div class="corner-ornament tl"><svg><use href="#corner-svg"/></svg></div>
+  <div class="corner-ornament tr"><svg><use href="#corner-svg"/></svg></div>
+  <div class="corner-ornament bl"><svg><use href="#corner-svg"/></svg></div>
+  <div class="corner-ornament br"><svg><use href="#corner-svg"/></svg></div>
+
+  <div class="section-inner">
+    <p class="finale-question" id="finale-q">هل أنتم مستعدون؟</p>
+    <button class="cta-button" id="cta-btn">ترقبوا العرض</button>
+  </div>
+</section>
+
+<script>
+// ============================================================
+// CURSOR
+// ============================================================
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+let mx = -100, my = -100, rx = -100, ry = -100;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursor.style.left = mx - 4 + 'px';
+  cursor.style.top = my - 4 + 'px';
+  setTimeout(() => {
+    ring.style.left = mx - 18 + 'px';
+    ring.style.top = my - 18 + 'px';
+  }, 80);
+});
+
+document.querySelectorAll('button, a').forEach(el => {
+  el.addEventListener('mouseenter', () => { ring.style.width = '60px'; ring.style.height = '60px'; ring.style.marginLeft = '-12px'; ring.style.marginTop = '-12px'; });
+  el.addEventListener('mouseleave', () => { ring.style.width = '36px'; ring.style.height = '36px'; ring.style.marginLeft = '0'; ring.style.marginTop = '0'; });
+});
+
+// ============================================================
+// PARTICLES
+// ============================================================
+const canvas = document.getElementById('particle-canvas');
+const ctx = canvas.getContext('2d');
+let W, H, particles = [];
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+class Particle {
+  constructor() { this.reset(); }
+  reset() {
+    this.x = Math.random() * W;
+    this.y = Math.random() * H + H;
+    this.size = Math.random() * 1.5 + 0.3;
+    this.speed = Math.random() * 0.4 + 0.1;
+    this.opacity = Math.random() * 0.5 + 0.1;
+    this.drift = (Math.random() - 0.5) * 0.3;
+    this.twinkle = Math.random() * Math.PI * 2;
+    this.twinkleSpeed = Math.random() * 0.02 + 0.005;
+    this.gold = Math.random() > 0.6;
+  }
+  update() {
+    this.y -= this.speed;
+    this.x += this.drift;
+    this.twinkle += this.twinkleSpeed;
+    if (this.y < -10) this.reset();
+  }
+  draw() {
+    const alpha = this.opacity * (0.7 + 0.3 * Math.sin(this.twinkle));
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fillStyle = this.gold
+      ? `rgba(201,168,76,${alpha})`
+      : `rgba(240,225,190,${alpha})`;
+    ctx.fill();
+  }
+}
+
+for (let i = 0; i < 180; i++) {
+  const p = new Particle();
+  p.y = Math.random() * H; // start spread across screen
+  particles.push(p);
+}
+
+function animateParticles() {
+  ctx.clearRect(0, 0, W, H);
+  particles.forEach(p => { p.update(); p.draw(); });
+  requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+// ============================================================
+// HERO RAYS
+// ============================================================
+function createRays() {
+  const container = document.getElementById('hero-rays');
+  const count = 18;
+  for (let i = 0; i < count; i++) {
+    const ray = document.createElement('div');
+    ray.className = 'ray';
+    const angle = (i / count) * 360 - 90;
+    const delay = i * 0.1;
+    const opacity = 0.08 + Math.random() * 0.12;
+    ray.style.cssText = `
+      transform: rotate(${angle}deg);
+      animation-delay: ${delay}s;
+      animation-duration: ${3 + Math.random() * 2}s;
+      opacity: ${opacity};
+      height: ${80 + Math.random() * 40}vh;
+      background: linear-gradient(to top, rgba(201,168,76,0.5), transparent);
+    `;
+    container.appendChild(ray);
+  }
+}
+createRays();
+
+// ============================================================
+// PRELOADER
+// ============================================================
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    gsap.to('#preloader', {
+      opacity: 0,
+      duration: 1.5,
+      ease: 'power2.inOut',
+      onComplete: () => {
+        document.getElementById('preloader').style.display = 'none';
+        initHero();
+      }
+    });
+  }, 2200);
+});
+
+// ============================================================
+// GSAP REGISTER
+// ============================================================
+gsap.registerPlugin(ScrollTrigger);
+
+// ============================================================
+// HERO ANIMATION
+// ============================================================
+function initHero() {
+  const tl = gsap.timeline();
+
+  tl.to('#hero-title', {
+    opacity: 1,
+    scale: 1,
+    duration: 2.8,
+    ease: 'expo.out',
+    onStart: () => {
+      playSfx(boom);
+    }
+  })
+  .to('#hero-sub', {
+    opacity: 1,
+    y: 0,
+    duration: 2,
+    ease: 'power2.out'
+  }, '-=1.4');
+}
+
+// ============================================================
+// SCROLL ANIMATIONS
+// ============================================================
+
+// -- Mystery section
+document.querySelectorAll('[data-reveal]').forEach((el, i) => {
+  gsap.to(el, {
+    scrollTrigger: { trigger: el, start: 'top 80%', toggleActions: 'play none none none' },
+    opacity: 1,
+    y: 0,
+    duration: 1.2,
+    delay: i * 0.15,
+    ease: 'power3.out'
+  });
+});
+
+document.querySelectorAll('[data-line]').forEach(el => {
+  ScrollTrigger.create({
+    trigger: el,
+    start: 'top 80%',
+    onEnter: () => el.classList.add('visible')
+  });
+});
+
+// -- Reveal sequence
+const revealLines = document.querySelectorAll('#reveal-seq .reveal-line');
+const seps = document.querySelectorAll('#sep-top, #sep-bottom');
+
+ScrollTrigger.create({
+  trigger: '#reveal',
+  start: 'top 60%',
+  onEnter: () => {
+    seps.forEach((s, i) => {
+      gsap.to(s, { opacity: 1, duration: 1, delay: i * 1.5 });
+    });
+    revealLines.forEach((line, i) => {
+      gsap.to(line, {
+        opacity: 1,
+        clipPath: 'inset(0 0% 0 0)',
+        duration: 1.2,
+        delay: 0.3 + i * 0.6,
+        ease: 'power4.out',
+        onStart: () => {
+          if (i === 3) {
+            setTimeout(() => {
+              document.getElementById('reveal').classList.add('shake');
+              setTimeout(() => document.getElementById('reveal').classList.remove('shake'), 500);
+            }, 200);
+          }
+        }
+      });
+    });
+  }
+});
+
+// -- Event section
+ScrollTrigger.create({
+  trigger: '#event',
+  start: 'top 65%',
+  onEnter: () => {
+    const tl = gsap.timeline();
+    tl.to('#ev-label', { opacity: 1, duration: 1, ease: 'power2.out' })
+      .to('#cdiv1', { opacity: 1, duration: 1, ease: 'power2.out' }, '-=0.3')
+      .to('#ev-title', { opacity: 1, scale: 1, duration: 1.5, ease: 'expo.out' }, '-=0.5')
+      .to('#cdiv2', { opacity: 1, duration: 1, ease: 'power2.out' }, '-=0.8')
+      .to('#ev-sub', { opacity: 1, duration: 1, ease: 'power2.out' }, '-=0.5');
+  }
+});
+
+// -- Finale
+ScrollTrigger.create({
+  trigger: '#finale',
+  start: 'top 70%',
+  onEnter: () => {
+    gsap.to('#finale-q', {
+      opacity: 1,
+      duration: 2,
+      ease: 'power3.out',
+      onStart: () => {
+        document.querySelector('#finale').classList.add('shake');
+        setTimeout(() => document.querySelector('#finale').classList.remove('shake'), 600);
+      }
+    });
+    gsap.to('#cta-btn', { opacity: 1, duration: 1.5, delay: 1.2, ease: 'power2.out' });
+  }
+});
+
+// ============================================================
+// AUDIO SYSTEM
+// ============================================================
+let audioOn = false;
+
+const ambient = document.getElementById('ambient-audio');
+const boom = document.getElementById('boom-sfx');
+const hit = document.getElementById('hit-sfx');
+const rise = document.getElementById('rise-sfx');
+const click = document.getElementById('click-sfx');
+
+ambient.volume = 0.2;
+boom.volume = 0.55;
+hit.volume = 0.45;
+rise.volume = 0.35;
+click.volume = 0.15;
+
+window.addEventListener('load', () => {
+  ambient.play().catch(() => {});
+
+  const enableAudio = () => {
+    ambient.muted = false;
+    ambient.volume = 0.2;
+    ambient.play().catch(() => {});
+
+    window.removeEventListener('click', enableAudio);
+    window.removeEventListener('scroll', enableAudio);
+    window.removeEventListener('mousemove', enableAudio);
+  };
+
+  window.addEventListener('click', enableAudio);
+  window.addEventListener('scroll', enableAudio);
+  window.addEventListener('mousemove', enableAudio);
+});
+
+
+function playSfx(sound) {
+  if (!audioOn) return;
+  sound.currentTime = 0;
+  sound.play().catch(() => {});
+}
+
+function toggleAudio() {
+  const label = document.getElementById('audio-label');
+
+  click.currentTime = 0;
+  click.play().catch(() => {});
+
+  if(audioOn) {
+    ambient.pause();
+    label.textContent = 'الصوت';
+    audioOn = false;
+  } else {
+    ambient.play().catch(()=>{});
+    label.textContent = 'إيقاف';
+    audioOn = true;
+
+    setTimeout(() => {
+      playSfx(boom);
+    }, 800);
+  }
+}
+
+// ============================================================
+// PARALLAX on mouse move for hero
+// ============================================================
+document.getElementById('hero').addEventListener('mousemove', (e) => {
+  const xRatio = (e.clientX / window.innerWidth - 0.5) * 20;
+  const yRatio = (e.clientY / window.innerHeight - 0.5) * 10;
+  gsap.to('#hero-title', { x: xRatio * -0.5, y: yRatio * -0.3, duration: 1, ease: 'power1.out' });
+  gsap.to('#hero-sub', { x: xRatio * 0.3, y: yRatio * 0.2, duration: 1.2, ease: 'power1.out' });
+});
+
+</script>
+</body>
+</html>
